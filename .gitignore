@@ -1,0 +1,37 @@
+# Environment
+.env
+.venv/
+venv/
+
+# Data (never commit raw documents or processed vector stores)
+data/raw/
+data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output artifacts
+output/
+logs/

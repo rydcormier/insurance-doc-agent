@@ -1,0 +1,40 @@
+# Core LLM and agent framework
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langchain-community>=0.2.0
+openai>=1.30.0
+
+# Embeddings and vector store
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+
+# Document parsing
+pdfplumber>=0.11.0
+pypdf>=4.0.0
+
+# Structured output extraction
+instructor>=1.3.0
+pydantic>=2.7.0
+
+# API serving
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+
+# Evaluation
+ragas>=0.1.9
+
+# Data and utilities
+pandas>=2.2.0
+numpy>=1.26.0
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+tiktoken>=0.7.0
+
+# Testing
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+httpx>=0.27.0
+
+# Dev tooling
+black>=24.4.0
+ruff>=0.4.0
