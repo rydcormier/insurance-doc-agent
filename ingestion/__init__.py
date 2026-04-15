@@ -1,0 +1,1 @@
+"""Document ingestion — parsing, chunking, and preparing documents for embedding."""
