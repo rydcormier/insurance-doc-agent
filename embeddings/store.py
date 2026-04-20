@@ -118,4 +118,19 @@ class VectorStore:
     
     def list_documents(self) -> list[dict]:
         """Return a list of all ingested documents."""
-        pass
+        results = self._collection.get(include=["metadatas"])
+        seen = {}
+        for meta in results["metadatas"]:
+            doc_id = meta["document_id"]
+            if doc_id and doc_id not in seen:
+                seen[doc_id] = {
+                    "document_id": doc_id,
+                    "document_name": meta.get("document_name"),
+                    "source": meta.get("source"),
+                }
+        return list(seen.values())
+    
+    @property
+    def count(self) -> int:
+        """Return the total number of chunks in the vector store."""
+        return self._collection.count()
