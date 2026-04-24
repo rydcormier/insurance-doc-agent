@@ -14,6 +14,8 @@ import json
 import os
 from typing import Optional
 
+import openai
+from dotenv import find_dotenv, load_dotenv
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 
@@ -29,6 +31,10 @@ def get_store() -> VectorStore:
     if _store is None:
         _store = VectorStore()
     return _store
+
+# get key from env
+load_dotenv(find_dotenv)
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # ----------------------------------------------------------------------------
 # Pydantic models for structured extraction output

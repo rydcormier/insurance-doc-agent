@@ -12,11 +12,11 @@ from typing import Optional
 
 import chromadb
 from chromadb.utils import embedding_functions
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 from ingestion.parser import DocumentChunk
 
-load_dotenv()
+load_dotenv(find_dotenv)
 
 
 
