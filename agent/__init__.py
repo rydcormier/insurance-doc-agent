@@ -1,1 +1,1 @@
-from agent import InsuranceAgent
+from agent import InsuranceAgent, SYSTEM_PROMPT

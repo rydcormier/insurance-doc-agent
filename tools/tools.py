@@ -14,12 +14,14 @@ import json
 import os
 from typing import Optional
 
+import instructor
 import openai
 from dotenv import find_dotenv, load_dotenv
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 
 from embeddings.store import VectorStore
+from agent import SYSTEM_PROMPT
 
 # shared vector store instance for all tools
 _store: Optional[VectorStore] = None
@@ -106,7 +108,8 @@ def extract_coverage_limits(document_id: str) -> str:
     """
     Extract stuructured coverage limit information from a specific policy 
     document. Returns deductibles, coverage limits, out-of-pockect maximums,
-    copays, coinsurance rates, and key exclusions in a structured format.
+    copays, coinsurance rates, and key exclusions in a structured format. For
+    exclusions, return a list of brief plain-English descriptions.
     
     Args:
         document_id: The ID of the document to extract from (use 
@@ -130,9 +133,29 @@ def extract_coverage_limits(document_id: str) -> str:
     if not context.strip():
         return f"No coverage information found for document ID: {document_id}"
     
-    # TODO: Replace this placeholder with an LLM extraction using instructor
-
-    return f"[Extraction stub] Context retrieved for document {document_id}:\n{context[:500]}..."
+    # call llm
+    client = instructor.from_openai(openai.OpenAI())
+    result = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_model=CoverageLimits,
+        messages=[
+            {
+                "role": "system",
+                "content": f"{SYSTEM_PROMPT}"
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Extract all coverage limit information from the following insurance policy text.\n\n"
+                    f"Policy text:\n{context}\n\n"
+                    "Return the deductible, coverage limit, out-of-pocket maximum, copay, "
+                    "coinsurance percentage, and any exclusions mentioned. For exclusions, "
+                    "return a list of brief plain-English descriptions."
+                )
+            }
+        ]
+    )
+    return result.model_dump_json(indent=2)
 
 
 @tool
@@ -158,12 +181,37 @@ def compare_policies(document_id_1: str, document_id_2: str, aspect: str = "cove
     if not context_1 and not context_2:
         return f"No information found for aspect '{aspect}' in either document."
     
-    # TODO: Feed context_1 and context_2 to the LLM with a comparison prompt
-    return (
-        f"[Comparison stub for aspect: {aspect}]\n\n"
-        f"Document {document_id_1}:\n{context_1[:300]}...\n\n"
-        f"Document {document_id_2}:\n{context_2[:300]}..."
+    # call llm
+    client = instructor.from_openai(openai.OpenAI())
+    result = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_model=CoverageLimits,
+        messages=[
+            {
+                "role": "system",
+                "content": f"{SYSTEM_PROMPT}"
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Compare these two insurance policies on the following aspect: {aspect}\n\n"
+                    f"--- POLICY 1: {document_id_1} ---\n"
+                    f"{context_1}\n\n"
+                    f"--- POLICY 2: {document_id_2} ---\n"
+                    f"{context_2}\n\n"
+                    "Structure your response as follows:\n"
+                    "1. Policy 1 summary: what it says about this aspect (2-3 sentences)\n"
+                    "2. Policy 2 summary: what it says about this aspect (2-3 sentences)\n"
+                    "3. Key differences: the most important distinctions a decision-maker should know\n"
+                    "4. Which is more favorable and why — or note if they are equivalent\n\n"
+                    "If either policy does not address this aspect in the provided text, "
+                    "state that clearly rather than inferring."
+                )
+            }
+        ]
     )
+    return result
+    
     
 
 @tool
@@ -189,11 +237,39 @@ def flag_anomalies(document_id: str) -> str:
     
     context = "\n\n".join([r["text"] for r in results])
     
-    # TODO: Send context to LLM with anomaly decection prompt
-    return (
-        f"[Anomaly detection stub] Retrieved {len(results)} passages for "
-        f"review\n{context[:400]}..."
+    # call llm
+    client = instructor.from_openai(openai.OpenAI())
+    result = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_model=CoverageLimits,
+        messages=[
+            {
+                "role": "system",
+                "content": f"{SYSTEM_PROMPT}"
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Review the following insurance policy text and identify anomalies, "
+                    f"non-standard provisions, ambiguous language, or potential coverage gaps.\n\n"
+                    f"Policy text:\n{context}\n\n"
+                    "For each issue found, provide:\n"
+                    "1. ISSUE: A short label for the anomaly (e.g. 'Non-standard exclusion')\n"
+                    "2. QUOTED TEXT: The exact language from the policy that is concerning "
+                    "(quote directly, do not paraphrase)\n"
+                    "3. WHY IT'S UNUSUAL: How this deviates from standard policy language "
+                    "or industry norms\n"
+                    "4. POTENTIAL IMPACT: How this could affect the policyholder in practice\n"
+                    "5. SEVERITY: Rate as LOW, MEDIUM, or HIGH\n\n"
+                    "If no genuine anomalies are found, say so explicitly. "
+                    "Do not manufacture concerns where none exist. "
+                    "List findings from highest to lowest severity."
+                )
+            }
+        ]
     )
+    return result
+    
 
 
 @tool
@@ -230,9 +306,29 @@ def generate_summary(document_id: str, audience: str = "general") -> str:
         "executive": "Provide a 5-bullet executive summary of key coverage and risks."
     }
     
-    # TODO: Send context + audience_instructions[audience] to LLM
-    return (
-        f"[Summary stub - audience: {audience}]\n"
-        f"Instruction: {audience_instructions[audience]}\n"
-        f"Context length: {len(context)} chars"
+    # call llm
+    client = instructor.from_openai(openai.OpenAI())
+    result = client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_model=CoverageLimits,
+        messages=[
+            {
+                "role": "system",
+                "content": f"{SYSTEM_PROMPT}"
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Summarize the following insurance policy for this audience: "
+                    f"{audience.upper()}\n\n"
+                    f"Audience guidance: {audience_instructions[audience]}\n\n"
+                    f"Policy text:\n{context}\n\n"
+                    "Base your summary only on what is explicitly stated in the provided text. "
+                    "If important information such as premium or coverage limits is not present "
+                    "in the retrieved text, note that it was not available rather than omitting "
+                    "it silently."
+                )
+            }
+        ]
     )
+    return result
