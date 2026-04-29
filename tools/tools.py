@@ -72,7 +72,7 @@ def search_policy_docuument(query: str, document_id: Optional[str] = None) -> st
     Returns:
         Relevant text passages from the policy documents.
     """
-    results = get_store().search(query, n_results=5, document_id=document_id)
+    results = get_store().search(query, n_results=8, document_id=document_id)
     if not results:
         return "No relevant information found for this query."
     
