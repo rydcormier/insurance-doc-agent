@@ -51,7 +51,7 @@ class TestVectorStore:
             if chunk.document_id not in seen:
                 seen[chunk.document_id] = chunk.document_name
         assert len(seen) == 2
-        assert "docaA" in seen
+        assert "docA" in seen
         assert "docB" in seen
         
     def test_search_returns_expected_structure(self):
