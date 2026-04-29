@@ -112,8 +112,8 @@ python scripts/evaluate.py --dataset data/processed/eval_set.json
 - [x] Policy comparison tool
 - [x] Anomaly detection tool
 - [x] Summary generation tool
-- [ ] Agent orchestration
-- [ ] FastAPI serving layer
+- [x] Agent orchestration
+- [x] FastAPI serving layer
 - [ ] RAGAS evaluation framework
 - [ ] Demo notebook
 
