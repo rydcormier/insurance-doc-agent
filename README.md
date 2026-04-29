@@ -38,8 +38,8 @@ insurance-doc-agent/
 
 ### Prerequisites
 
-- Python 3.11+
-- OpenAI API key (or local model via Ollama)
+- Python 3.10+
+- OpenAI API key
 
 ### Installation
 
@@ -82,11 +82,19 @@ print(response)
 uvicorn api.app:app --reload --port 8000
 ```
 
+![API example](notebooks/img/ex_api.png)
+
 ### Run Evaluations
 
 ```bash
 python scripts/evaluate.py --dataset data/processed/eval_set.json
 ```
+
+Runs four RAGAS metrics — faithfulness, answer relevancy, context precision, and context
+recall — against agent outputs. The evaluator uses `gpt-4o-mini` as the judge LLM and
+`text-embedding-3-small` for answer-relevancy scoring (requires a valid `OPENAI_API_KEY`).
+
+![Evaluation example](notebooks/img/ex_evaluate.png)
 
 ## Tech Stack
 
@@ -114,7 +122,7 @@ python scripts/evaluate.py --dataset data/processed/eval_set.json
 - [x] Summary generation tool
 - [x] Agent orchestration
 - [x] FastAPI serving layer
-- [ ] RAGAS evaluation framework
+- [x] RAGAS evaluation framework
 - [ ] Demo notebook
 
 ## References

@@ -18,13 +18,11 @@ from pathlib import Path
 from typing import Optional 
 
 from datasets import Dataset
-from ragas import evaluate 
-from ragas.metrics import (
-    answer_faithfulness,
-    answer_relevancy,
-    context_precision,
-    context_recall,
-)
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from ragas import evaluate
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
+from ragas.metrics import Faithfulness, AnswerRelevancy, ContextPrecision, ContextRecall
 
 from agent.agent import InsuranceAgent
 from embeddings.store import VectorStore
@@ -87,7 +85,7 @@ class AgentEvaluator:
         ]
         """
         data = json.loads(Path(path).read_text())
-        return [EvalSample(q=d["question"], ground_truth=d["ground_truth"]) for d in data]
+        return [EvalSample(question=d["question"], ground_truth=d["ground_truth"]) for d in data]
     
     def run_agent(self, samples: list[EvalSample]) -> list [EvalSample]:
         """Run the agent on each sample and collect answers and contexts."""
@@ -101,9 +99,9 @@ class AgentEvaluator:
             
             # extract retrieved contexts from intermediate steps
             contexts = []
-            for action, observation in result["intermediate_steps"]:
-                if hasattr(action, "tool") and action.tool == "search_policy_document":
-                    contexts.append(str(observation))
+            for tool_msg in result["intermediate_steps"]:
+                if tool_msg.name == "search_policy_docuument":
+                    contexts.append(str(tool_msg.content))
             sample.contexts = contexts if contexts else ["No context retrieved."]
             
             # reset memory between samples for clean evaluation
@@ -111,7 +109,7 @@ class AgentEvaluator:
             
         return samples
 
-    def evalutate(self, samples: list[EvalSample]) -> EvalResults:
+    def evaluate(self, samples: list[EvalSample]) -> EvalResults:
         """
         Run RAGAS evaluation metrics on a set of evaluated samples.
 
@@ -122,27 +120,34 @@ class AgentEvaluator:
         Returns:
             EvalResults with aggregated metric scores.
         """
+        llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini", temperature=0))
+        embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings(model="text-embedding-3-small"))
+
         dataset = Dataset.from_dict({
             "question": [s.question for s in samples],
             "answer": [s.answer for s in samples],
             "contexts": [s.contexts for s in samples],
-            "ground_truth": [s.ground_truth for s in samples]
+            "ground_truth": [s.ground_truth for s in samples],
         })
-        
+
         result = evaluate(
             dataset,
             metrics=[
-                answer_faithfulness,
-                answer_relevancy,
-                context_precision,
-                context_recall
+                Faithfulness(llm=llm),
+                AnswerRelevancy(llm=llm, embeddings=embeddings),
+                ContextPrecision(llm=llm),
+                ContextRecall(llm=llm),
             ],
         )
         
+        def _mean(scores: list) -> float:
+            valid = [s for s in scores if s is not None]
+            return sum(valid) / len(valid) if valid else float("nan")
+
         return EvalResults(
-            faithfulness=result["faithfulness"],
-            answer_relevancy=result["answer_relevancy"],
-            context_precision=result["context_precision"],
-            context_recall=result["context_recall"],
-            n_samples=len(samples)
+            faithfulness=_mean(result["faithfulness"]),
+            answer_relevancy=_mean(result["answer_relevancy"]),
+            context_precision=_mean(result["context_precision"]),
+            context_recall=_mean(result["context_recall"]),
+            n_samples=len(samples),
         )
