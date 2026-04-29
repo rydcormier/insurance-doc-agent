@@ -35,12 +35,14 @@ class DocumentChunk:
     ) -> DocumentChunk:
         """Factory method to create a DocumentChunk with a unique chunk_id."""
         chunk_id = hashlib.md5(f"{document_id}:{page_number}:{text[:50]}".encode()).hexdigest()
+        metadata = {} if not metadata else metadata
         return cls(
             chunk_id=chunk_id,
             document_id=document_id,
             document_name=document_name,
             page_number=page_number,
-            text=text
+            text=text,
+            metadata=metadata
         )
 
 

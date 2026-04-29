@@ -21,7 +21,7 @@ from langchain.tools import tool
 from pydantic import BaseModel, Field
 
 from embeddings.store import VectorStore
-from agent import SYSTEM_PROMPT
+from prompts import SYSTEM_PROMPT
 
 # shared vector store instance for all tools
 _store: Optional[VectorStore] = None
@@ -35,7 +35,7 @@ def get_store() -> VectorStore:
     return _store
 
 # get key from env
-load_dotenv(find_dotenv)
+load_dotenv(find_dotenv())
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # ----------------------------------------------------------------------------

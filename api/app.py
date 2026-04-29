@@ -15,7 +15,7 @@ from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
-from agent.agent import InsuranceAgent
+from agent import InsuranceAgent
 from ingestion.parser import DocumentParser
 from embeddings.store import VectorStore
 

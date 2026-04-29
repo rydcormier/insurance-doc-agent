@@ -48,13 +48,13 @@ class TestSearchTool:
         from tools.tools import search_policy_docuument
         result = search_policy_docuument.invoke("obscure query with no matches")
         
-        assert "No relevant passeges" in result
+        assert "No relevant" in result
     
     
 class TestListDocumentsTool:
     @patch("tools.tools.get_store")
     def test_returns_document_list(self, mock_get_store):
-        mock_store = MagicMock
+        mock_store = MagicMock()
         mock_store.list_documents.return_value = [
             {"document_id": "abc123", "document_name": "blue_shield_policy"},
             {"document_id": "def456", "document_name": "aetna_policy"},

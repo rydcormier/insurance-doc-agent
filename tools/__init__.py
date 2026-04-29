@@ -5,7 +5,7 @@ from tools.tools import (
     list_available_documents,
     extract_coverage_limits,
     compare_policies,
-    flag_anomolies,
+    flag_anomalies,
     generate_summary
 )
 
@@ -14,6 +14,6 @@ ALL_TOOLS = [
     list_available_documents,
     extract_coverage_limits,
     compare_policies,
-    flag_anomolies,
+    flag_anomalies,
     generate_summary
 ]

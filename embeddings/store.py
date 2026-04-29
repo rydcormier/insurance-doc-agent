@@ -16,7 +16,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from ingestion.parser import DocumentChunk
 
-load_dotenv(find_dotenv)
+load_dotenv(find_dotenv())
 
 
 
