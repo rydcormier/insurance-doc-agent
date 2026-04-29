@@ -51,11 +51,11 @@ class DocumentParser:
     Parses PDF insurance documents into chunks for embedding.
     
     Usage:
-        parser = DocumentParser(chunk_size=1000, chunk_overlap=200)
+        parser = DocumentParser(chunk_size=800, chunk_overlap=300)
         chunks = parser.parse("path/to/insurance_policy.pdf")
     """
 
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+    def __init__(self, chunk_size: int = 800, chunk_overlap: int = 300):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self._splitter = RecursiveCharacterTextSplitter(
