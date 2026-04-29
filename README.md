@@ -96,6 +96,28 @@ recall — against agent outputs. The evaluator uses `gpt-4o-mini` as the judge 
 
 ![Evaluation example](notebooks/img/ex_evaluate.png)
 
+## Evaluation Results
+
+Benchmarked against a 20-question dataset derived from the Florida OIR Medicare Supplement
+Outline of Coverage (Form OIR-B2-MSC2), covering all 10 standard plans. Evaluated using
+RAGAS with `gpt-4o-mini` as judge LLM. Benchmark available at
+`data/processed/eval_set_medsuppl.json`.
+
+### Parameter Study — chunk_size / chunk_overlap
+
+| Metric | v1 (1000 / 200) | v2 (800 / 300) |
+|--------|-----------------|----------------|
+| Faithfulness | 0.71 | 0.69 |
+| Answer Relevancy | 0.83 | 0.81 |
+| Context Precision | 0.82 | **0.87 ↑** |
+| Context Recall | 0.54 | **0.58 ↑** |
+
+Smaller chunks with higher overlap improved retrieval precision and recall at a measured
+cost to faithfulness — a tradeoff reflecting the tabular structure of insurance policy
+documents, where reducing chunk size improves boundary precision but reduces the context
+available to ground each answer. Next experiment: plan-aware chunking using Medicare
+Supplement plan section headers as natural boundaries.
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -124,6 +146,8 @@ recall — against agent outputs. The evaluator uses `gpt-4o-mini` as the judge 
 - [x] FastAPI serving layer
 - [x] RAGAS evaluation framework
 - [ ] Demo notebook
+- [ ] Plan-aware chunking strategy
+- [ ] Improve context recall above 0.65
 
 ## References
 
